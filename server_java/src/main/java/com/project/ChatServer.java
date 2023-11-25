@@ -13,6 +13,8 @@ public class ChatServer extends WebSocketServer {
 
     static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
+    Operations op = new Operations();
+
     public ChatServer (int port) {
         super(new InetSocketAddress(port));
     }
@@ -26,6 +28,7 @@ public class ChatServer extends WebSocketServer {
         System.out.println("Type 'exit' to stop and exit server.");
         setConnectionLostTimeout(0);
         setConnectionLostTimeout(100);
+        op.printBoard();
     }
 
     @Override
@@ -40,26 +43,26 @@ public class ChatServer extends WebSocketServer {
         objWlc.put("value", "Welcome to the chat server");
         conn.send(objWlc.toString()); 
 
-        // Li enviem el seu identificador
-        JSONObject objId = new JSONObject("{}");
-        objId.put("type", "id");
-        objId.put("from", "server");
-        objId.put("value", clientId);
-        conn.send(objId.toString()); 
+        // // Li enviem el seu identificador
+        // JSONObject objId = new JSONObject("{}");
+        // objId.put("type", "id");
+        // objId.put("from", "server");
+        // objId.put("value", clientId);
+        // conn.send(objId.toString()); 
 
-        // Enviem al client la llista amb tots els clients connectats
-        sendList(conn);
+        // // Enviem al client la llista amb tots els clients connectats
+        // sendList(conn);
 
-        // Enviem la direcció URI del nou client a tothom 
-        JSONObject objCln = new JSONObject("{}");
-        objCln.put("type", "connected");
-        objCln.put("from", "server");
-        objCln.put("id", clientId);
-        broadcast(objCln.toString());
+        // // Enviem la direcció URI del nou client a tothom 
+        // JSONObject objCln = new JSONObject("{}");
+        // objCln.put("type", "connected");
+        // objCln.put("from", "server");
+        // objCln.put("id", clientId);
+        // broadcast(objCln.toString());
 
-        // Mostrem per pantalla (servidor) la nova connexió
-        String host = conn.getRemoteSocketAddress().getAddress().getHostAddress();
-        System.out.println("New client (" + clientId + "): " + host);
+        // // Mostrem per pantalla (servidor) la nova connexió
+        // String host = conn.getRemoteSocketAddress().getAddress().getHostAddress();
+        // System.out.println("New client (" + clientId + "): " + host);
     }
 
     @Override
