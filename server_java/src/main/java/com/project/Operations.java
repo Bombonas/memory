@@ -11,6 +11,12 @@ public class Operations {
     
     String[] colors = {"Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink", "Black"};
 
+    ArrayList<String> players = new ArrayList<String>();
+
+    String firstCol;
+
+    int tunFlips = 2; 
+
     Operations(){
         ArrayList<String> colorPairs = new ArrayList<>();
         
@@ -38,6 +44,17 @@ public class Operations {
                 System.out.print(board[i][j] + " ");
             }
             System.out.println();
+        }
+    }
+
+    public void flipCard(String playerName, int row, int col){
+        if(showBoard[row][col] == 0){
+            showBoard[row][col] = 2;
+            if(firstCol == null){
+                firstCol = board[row][col];
+            }else if(firstCol == board[row][col]){
+                
+            }
         }
     }
         

@@ -36,13 +36,6 @@ public class ChatServer extends WebSocketServer {
         // Quan un client es connecta
         String clientId = getConnectionId(conn);
 
-        // Saludem personalment al nou client
-        JSONObject objWlc = new JSONObject("{}");
-        objWlc.put("type", "private");
-        objWlc.put("from", "server");
-        objWlc.put("value", "Welcome to the chat server");
-        conn.send(objWlc.toString()); 
-
         // // Li enviem el seu identificador
         // JSONObject objId = new JSONObject("{}");
         // objId.put("type", "id");
@@ -89,36 +82,14 @@ public class ChatServer extends WebSocketServer {
             JSONObject objRequest = new JSONObject(message);
             String type = objRequest.getString("type");
 
-            if (type.equalsIgnoreCase("list")) {
-                // El client demana la llista de tots els clients
-                System.out.println("Client '" + clientId + "'' requests list of clients");
-                sendList(conn);
+            if (type.equalsIgnoreCase("hello")) {
 
-            } else if (type.equalsIgnoreCase("private")) {
-                // El client envia un missatge privat a un altre client
-                System.out.println("Client '" + clientId + "'' sends a private message");
+                String userName = objRequest.getString("name");
+                op.players.add(userName);
 
-                JSONObject objResponse = new JSONObject("{}");
-                objResponse.put("type", "private");
-                objResponse.put("from", clientId);
-                objResponse.put("value", objRequest.getString("value"));
-
-                String destination = objRequest.getString("destination");
-                WebSocket desti = getClientById(destination);
-
-                if (desti != null) {
-                    desti.send(objResponse.toString()); 
-                }
+            } else if (type.equalsIgnoreCase("flip")) {
                 
-            } else if (type.equalsIgnoreCase("broadcast")) {
-                // El client envia un missatge a tots els clients
-                System.out.println("Client '" + clientId + "'' sends a broadcast message to everyone");
-
-                JSONObject objResponse = new JSONObject("{}");
-                objResponse.put("type", "broadcast");
-                objResponse.put("from", clientId);
-                objResponse.put("value", objRequest.getString("value"));
-                broadcast(objResponse.toString());
+                
             }
 
         } catch (Exception e) {
