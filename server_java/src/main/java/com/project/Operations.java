@@ -12,14 +12,19 @@ public class Operations {
     String[] colors = {"Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink", "Black"};
 
     ArrayList<String> players = new ArrayList<String>();
+    ArrayList<Integer> points = new ArrayList<Integer>();
 
-    String firstCol;
+    ArrayList<Integer> firstSelect = new ArrayList<Integer>();
 
-    int tunFlips = 2; 
+    int turn = 1;
+    int turnFlips = 0; 
 
     Operations(){
         ArrayList<String> colorPairs = new ArrayList<>();
-        
+        firstSelect.add(0);
+        firstSelect.add(0);
+        points.add(0);
+        points.add(0);
         for (String color : colors) {
             colorPairs.add(color);
             colorPairs.add(color);
@@ -47,15 +52,30 @@ public class Operations {
         }
     }
 
-    public void flipCard(String playerName, int row, int col){
-        if(showBoard[row][col] == 0){
+    public boolean flipCard(int row, int col){
+        if(showBoard[row][col] == 0 && turnFlips <= 2){
+            ++turnFlips;
             showBoard[row][col] = 2;
-            if(firstCol == null){
-                firstCol = board[row][col];
-            }else if(firstCol == board[row][col]){
-                
+            if(turnFlips == 2) return true;
+            else{
+                 firstSelect.set(0, row);
+                 firstSelect.set(1, col);
             }
         }
+        return false;
+    }
+
+    public void newTurn(){
+        turn = (turn + 1) % 2;
+    }
+
+    public boolean hasEnded(){
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if(showBoard[i][j] == 0) return false;
+            }
+        }
+        return true;
     }
         
 }

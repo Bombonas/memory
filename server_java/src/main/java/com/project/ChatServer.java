@@ -83,13 +83,51 @@ public class ChatServer extends WebSocketServer {
             String type = objRequest.getString("type");
 
             if (type.equalsIgnoreCase("hello")) {
-
-                String userName = objRequest.getString("name");
-                op.players.add(userName);
+                
+                // save players while they are less than 2
+                if(op.players.size() < 2){
+                    String userName = objRequest.getString("name");
+                    op.players.add(userName);
+                    if(op.players.size() == 2){
+                        startTurn();
+                    }
+                }
+                
 
             } else if (type.equalsIgnoreCase("flip")) {
-                
-                
+                // Chack if is the correct player
+                if(op.players.get(op.turn).equals(objRequest.getString("name"))){
+                    int row = objRequest.getInt("row");
+                    int col = objRequest.getInt("col");
+                    // Check if is the last flip
+                    if(op.flipCard(row, col)){
+                        // Check if the two cards are the same color
+                        if(op.board[op.firstSelect.get(0)][op.firstSelect.get(1)].equals(op.board[row][col])){
+                            op.showBoard[op.firstSelect.get(0)][op.firstSelect.get(1)] = 1;
+                            op.showBoard[row][col] = 1;
+                            broadcast("{ \"type\": \"permShow\", \"row\": "+row+", \"col\": "+col+", \"color\": \""+op.board[row][col]+"\" }");
+                            broadcast("{ \"type\": \"permShow\", \"row\": "+op.firstSelect.get(0)+", \"col\": "+op.firstSelect.get(1)+", \"color\": \""
+                            +op.board[op.firstSelect.get(0)][op.firstSelect.get(1)]+"\" }");
+                            
+                            if(op.hasEnded()){
+                                int highestScore = 0;
+                                String winnerPlayer = "";
+                                for (int i = 0; i < op.points.size(); i++) {
+                                    if (op.points.get(i) > highestScore) {
+                                        highestScore = op.points.get(i);
+                                        winnerPlayer = op.players.get(i);
+                                    }
+                                }
+                                broadcast("{ \"type\": \"winner\", \"player\": \""+winnerPlayer+"\" }");
+                            }
+
+                        }else{
+                            op.showBoard[op.firstSelect.get(0)][op.firstSelect.get(1)] = 0;
+                            op.showBoard[row][col] = 0;
+                        } 
+                        startTurn();
+                    }
+                }
             }
 
         } catch (Exception e) {
@@ -157,4 +195,11 @@ public class ChatServer extends WebSocketServer {
         
         return null;
     }
+
+    public void startTurn(){
+        op.newTurn();
+        // Send mssg to notify new turn
+        broadcast("{ \"type\": \"newTurn\", \"plays\": \""+ op.players.get(op.turn)+"\", \"waits\": \""+ op.players.get((op.turn+1)%2)+"\" \"prePoints\": "+ op.points.get(op.turn)+" }");
+    }
+
 }

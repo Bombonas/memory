@@ -24,6 +24,7 @@ public class AppData {
     private AppSocketsClient socketClient;
     private String ip = "localhost";
     private String port = "8888";
+    private String name = "Gyro";
     private ConnectionStatus connectionStatus = ConnectionStatus.DISCONNECTED;
     private String mySocketId;
     private List<String> clients = new ArrayList<>();
@@ -93,6 +94,7 @@ public class AppData {
             }
         });
         pause.play();
+        socketClient.send("{ \"type\": \"hello\",  \"name\": \""+ name +"\"}");
     }
 
     public void disconnectFromServer() {
@@ -106,7 +108,6 @@ public class AppData {
     }
 
     private void onOpen (ServerHandshake handshake) {
-        System.out.println("Handshake: " + handshake.getHttpStatusMessage());
         connectionStatus = ConnectionStatus.CONNECTED; 
     }
 
@@ -124,33 +125,6 @@ public class AppData {
                 data.getJSONArray("list").forEach(item -> clients.add(item.toString()));
                 clients.remove(mySocketId);
                 messages.append("List of clients: ").append(data.getJSONArray("list")).append("\n");
-                updateClientList();
-                break;
-            case "id":
-                mySocketId = data.getString("value");
-                messages.append("Id received: ").append(data.getString("value")).append("\n");
-                break;
-            case "connected":
-                clients.add(data.getString("id"));
-                clients.remove(mySocketId);
-                messages.append("Connected client: ").append(data.getString("id")).append("\n");
-                updateClientList();
-                break;
-            case "disconnected":
-                String removeId = data.getString("id");
-                if (selectedClient.equals(removeId)) {
-                    selectedClient = "";
-                }
-                clients.remove(data.getString("id"));
-                messages.append("Disconnected client: ").append(data.getString("id")).append("\n");
-                updateClientList();
-                break;
-            case "private":
-                messages.append("Private message from '")
-                        .append(data.getString("from"))
-                        .append("': ")
-                        .append(data.getString("value"))
-                        .append("\n");
                 break;
             default:
                 messages.append("Message from '")
@@ -179,13 +153,6 @@ public class AppData {
         JSONObject message = new JSONObject();
         message.put("type", "list");
         socketClient.send(message.toString());
-    }
-
-    public void updateClientList() {
-        if (connectionStatus == ConnectionStatus.CONNECTED) {
-            CtrlLayoutConnected ctrlConnected = (CtrlLayoutConnected) UtilsViews.getController("Connected");
-            ctrlConnected.updateClientList(clients);
-        }
     }
 
     public void selectClient(int index) {
@@ -236,6 +203,14 @@ public class AppData {
 
     public String getPort() {
         return port;
+    }
+
+    public String getName(){
+        return name;
+    }
+
+    public String setName(String name){
+        return this.name = name;
     }
 
     public String setPort (String port) {

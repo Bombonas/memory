@@ -13,74 +13,65 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseEvent;
 
 public class CtrlLayoutConnected {
 
-    @FXML
-    private Label serverAddressLabel;
+     @FXML
+    private Label torn; 
 
     @FXML
-    private Label clientIdLabel;
+    private Label espera; 
 
     @FXML
-    private TextArea messagesArea;
+    private GridPane grid;
 
-    @FXML
-    private ListView<String> clientsList;
+    private AnchorPane[][] anchorPanes;
+    private int rows = 4;
+    private int cols = 4;
 
-    @FXML
-    private TextField messageField;
-
-    @FXML
-    private Button sendButton;
 
     public void initialize() {
+        anchorPanes = new AnchorPane[rows][cols];
+        // Set new selection (or deselect)
+        AppData appData = AppData.getInstance();
 
-        clientsList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        for (int row = 0; row < 4; row++) {
+            for (int col = 0; col < 4; col++) {
+                AnchorPane anchorPane = new AnchorPane();
+                anchorPane.setStyle("-fx-background-color: gray;");
+                anchorPanes[row][col] = anchorPane;
 
-        clientsList.setOnMouseClicked(event -> {
-
-            // Set new selection (or deselect)
-            AppData appData = AppData.getInstance();
-            int clickedIndex = clientsList.getSelectionModel().getSelectedIndex();
-            appData.selectClient(clickedIndex); 
-
-            // Get real selection (can be unset)
-            Integer selectedIndex = appData.getSelectedClientIndex();
-            if (selectedIndex != null) {
-                sendButton.setText("Send");
-            } else {
-                sendButton.setText("Broadcast");
+                configureAnchorPaneClick(anchorPane,  row,  col);
+                grid.add(anchorPane, col, row); 
             }
-            sendButton.requestFocus();
-
-            // De-select all
-            for (int i = 0; i < clientsList.getItems().size(); i++) {
-                clientsList.getSelectionModel().clearSelection(i);
-            }
-
-            appData.updateClientList();
-        });
+        }
+    }
     
-        clientsList.setCellFactory(lv -> new ListCell<String>() {
+    private void configureAnchorPaneClick(AnchorPane anchorPane, final int row, final int col) {
+        anchorPane.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setText(null);
-                } else {
-                    setText(item);
-                    AppData appData = AppData.getInstance();
-                    Integer selectedIndex = appData.getSelectedClientIndex();
-                    if (selectedIndex != null && selectedIndex.intValue() == getIndex()) {
-                        setStyle("-fx-background-color: #14b5ff; -fx-text-fill: white;");
-                    } else {
-                        setStyle(null);
-                    }
-                }
+            public void handle(MouseEvent event) {
+
+                System.out.println("Clic en la posición (" + row + ", " + col + ")");
+                anchorPane.setStyle("-fx-background-color: lightgray;");
             }
         });
     }
+
+    private void setColorForAnchorPane(int row, int col, String color) {
+    if (row >= 0 && row < rows && col >= 0 && col < cols) {
+        AnchorPane anchorPane = anchorPanes[row][col];
+        anchorPane.setStyle("-fx-background-color: " + color + ";");
+    }
+}
     
     @FXML
     private void handleDisconnect(ActionEvent event) {
@@ -91,24 +82,13 @@ public class CtrlLayoutConnected {
     @FXML
     private void handleSend(ActionEvent event) {
         AppData appData = AppData.getInstance();
-        String message = messageField.getText();
-        appData.send(message);
-        messageField.clear();
     }
 
     public void updateInfo() {
         AppData appData = AppData.getInstance();
-        serverAddressLabel.setText("ws://" + appData.getIp() + ":" + appData.getPort());
-        clientIdLabel.setText(appData.getMySocketId());
     }
 
     public void updateMessages(String messages) {
-        messagesArea.setText(messages);
     }
 
-    public void updateClientList(List<String> clients) {
-        Platform.runLater(() -> {
-            clientsList.setItems(FXCollections.observableArrayList(clients));
-        });
-    }
 }

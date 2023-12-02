@@ -22,24 +22,14 @@
          </children>
       </AnchorPane>
       <HBox alignment="CENTER_LEFT" layoutX="14.0" layoutY="62.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0">
-         <Label text="Torn  de: " />
-         <Label fx:id="serverAddressLabel">
-            <font>
-               <Font name="System Bold" size="13.0" />
-            </font>
-        </Label>
+         <Label fx:id="torn" text="Torn  de: " />
          <Region HBox.hgrow="ALWAYS" />
-         <Label text="En espera: " />
-         <Label fx:id="serverAddressLabel1">
-            <font>
-               <Font name="System Bold" size="13.0" />
-            </font>
-         </Label>
+         <Label fx:id="espera" text="En espera: " />
       </HBox>
 
       <HBox alignment="CENTER" layoutY="92.0" spacing="8.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="100.0">
          <children>
-            <GridPane hgap="10.0" vgap="10.0">
+            <GridPane fx:id="grid" hgap="10.0" vgap="10.0">
               <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
