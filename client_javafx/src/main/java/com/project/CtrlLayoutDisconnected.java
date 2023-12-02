@@ -27,8 +27,6 @@ public class CtrlLayoutDisconnected {
 
     private AppData appData;
 
-    Rectangle rect = new Rectangle();
-    Circle circle = new Circle();
 
     public void initialize() {
         appData = AppData.getInstance();
@@ -52,6 +50,5 @@ public class CtrlLayoutDisconnected {
         appData.setPort(portTextField.getText());
         appData.setName(nameTextField1.getText());
         appData.connectToServer();
-
     }
 }

@@ -20,6 +20,7 @@ import java.util.Enumeration;
         - Flip card     { "type": "flip", "row": 1, "col": 1, "color": "Black" }
         - Permanent flip card    { "type": "permShow", "row": 1, "col": 1, "color": "Black" }
         - New turn    { "type": "newTurn", "plays": "Gapy", "waits": "UwU" "prePoints": 20000321342 } //Previous player's points
+        - Clear     { "type": "clear"} clear the board
         - Winner    { "type": "winner", "player": "Gapy" }
  */
 

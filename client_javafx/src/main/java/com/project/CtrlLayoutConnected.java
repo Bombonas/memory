@@ -37,12 +37,14 @@ public class CtrlLayoutConnected {
     private int rows = 4;
     private int cols = 4;
 
+    AppData appData;
+
 
     public void initialize() {
         anchorPanes = new AnchorPane[rows][cols];
         // Set new selection (or deselect)
-        AppData appData = AppData.getInstance();
-
+        appData = AppData.getInstance();
+        
         for (int row = 0; row < 4; row++) {
             for (int col = 0; col < 4; col++) {
                 AnchorPane anchorPane = new AnchorPane();
@@ -59,14 +61,13 @@ public class CtrlLayoutConnected {
         anchorPane.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-
                 System.out.println("Clic en la posición (" + row + ", " + col + ")");
-                anchorPane.setStyle("-fx-background-color: lightgray;");
+                appData.flipCard(row, col);
             }
         });
     }
 
-    private void setColorForAnchorPane(int row, int col, String color) {
+    public void setColorForAnchorPane(int row, int col, String color) {
     if (row >= 0 && row < rows && col >= 0 && col < cols) {
         AnchorPane anchorPane = anchorPanes[row][col];
         anchorPane.setStyle("-fx-background-color: " + color + ";");

@@ -94,7 +94,6 @@ public class AppData {
             }
         });
         pause.play();
-        socketClient.send("{ \"type\": \"hello\",  \"name\": \""+ name +"\"}");
     }
 
     public void disconnectFromServer() {
@@ -109,9 +108,11 @@ public class AppData {
 
     private void onOpen (ServerHandshake handshake) {
         connectionStatus = ConnectionStatus.CONNECTED; 
+        hello();
     }
 
     private void onMessage(String message) {
+        System.out.println(message);
         JSONObject data = new JSONObject(message);
 
         if (connectionStatus != ConnectionStatus.CONNECTED) {
@@ -120,18 +121,11 @@ public class AppData {
 
         String type = data.getString("type");
         switch (type) {
-            case "list":
-                clients.clear();
-                data.getJSONArray("list").forEach(item -> clients.add(item.toString()));
-                clients.remove(mySocketId);
-                messages.append("List of clients: ").append(data.getJSONArray("list")).append("\n");
-                break;
-            default:
-                messages.append("Message from '")
-                        .append(data.getString("from"))
-                        .append("': ")
-                        .append(data.getString("value"))
-                        .append("\n");
+            case "flip":
+                if (connectionStatus == ConnectionStatus.CONNECTED) {
+                    CtrlLayoutConnected ctrlConnected = (CtrlLayoutConnected) UtilsViews.getController("Connected");
+                    ctrlConnected.setColorForAnchorPane(data.getInt("row"), data.getInt("col"), data.getString("color"));        
+                }
                 break;
         }
         if (connectionStatus == ConnectionStatus.CONNECTED) {
@@ -177,6 +171,11 @@ public class AppData {
         }
     }
 
+    public void hello(){
+        System.out.println("{ \"type\": \"hello\",  \"name\": \""+name+"\"}");
+        socketClient.send("{ \"type\": \"hello\",  \"name\": \""+name+"\"}");
+    }
+
     public void broadcastMessage(String msg) {
         JSONObject message = new JSONObject();
         message.put("type", "broadcast");
@@ -191,6 +190,10 @@ public class AppData {
         message.put("value", msg);
         message.put("destination", selectedClient);
         socketClient.send(message.toString());
+    }
+
+    public void flipCard(int row, int col){
+        socketClient.send("{ \"type\": \"flip\", \"row\": "+row+", \"col\": "+col+" , \"name\": \""+name+"\"}");
     }
 
     public String getIp() {

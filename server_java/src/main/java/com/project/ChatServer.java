@@ -81,12 +81,12 @@ public class ChatServer extends WebSocketServer {
         try {
             JSONObject objRequest = new JSONObject(message);
             String type = objRequest.getString("type");
-
             if (type.equalsIgnoreCase("hello")) {
-                
+                System.out.println("ola");
                 // save players while they are less than 2
                 if(op.players.size() < 2){
                     String userName = objRequest.getString("name");
+                    System.out.println(userName);
                     op.players.add(userName);
                     if(op.players.size() == 2){
                         startTurn();
@@ -99,8 +99,11 @@ public class ChatServer extends WebSocketServer {
                 if(op.players.get(op.turn).equals(objRequest.getString("name"))){
                     int row = objRequest.getInt("row");
                     int col = objRequest.getInt("col");
+                    
                     // Check if is the last flip
                     if(op.flipCard(row, col)){
+                        broadcast("{ \"type\": \"flip\", \"row\": "+row+", \"col\": "+col+", \"color\": \""+op.board[row][col]+"\" }");
+
                         // Check if the two cards are the same color
                         if(op.board[op.firstSelect.get(0)][op.firstSelect.get(1)].equals(op.board[row][col])){
                             op.showBoard[op.firstSelect.get(0)][op.firstSelect.get(1)] = 1;
@@ -121,11 +124,13 @@ public class ChatServer extends WebSocketServer {
                                 broadcast("{ \"type\": \"winner\", \"player\": \""+winnerPlayer+"\" }");
                             }
 
-                        }else{
+                        }else {
                             op.showBoard[op.firstSelect.get(0)][op.firstSelect.get(1)] = 0;
                             op.showBoard[row][col] = 0;
                         } 
                         startTurn();
+                    }else if(op.turnFlips == 1){
+                        broadcast("{ \"type\": \"flip\", \"row\": "+row+", \"col\": "+col+", \"color\": \""+op.board[row][col]+"\" }");
                     }
                 }
             }
@@ -199,7 +204,7 @@ public class ChatServer extends WebSocketServer {
     public void startTurn(){
         op.newTurn();
         // Send mssg to notify new turn
-        broadcast("{ \"type\": \"newTurn\", \"plays\": \""+ op.players.get(op.turn)+"\", \"waits\": \""+ op.players.get((op.turn+1)%2)+"\" \"prePoints\": "+ op.points.get(op.turn)+" }");
+        broadcast("{ \"type\": \"newTurn\", \"plays\": \""+ op.players.get(op.turn)+"\", \"waits\": \""+ op.players.get((op.turn+1)%2)+"\", \"prePoints\": "+ op.points.get(op.turn)+" }");
     }
 
 }
