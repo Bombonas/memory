@@ -18,15 +18,31 @@ enum ConnectionStatus {
 class AppData with ChangeNotifier {
   String ip = "localhost";
   String port = "8888";
+  String userName = "";
 
   IOWebSocketChannel? _socketClient;
   ConnectionStatus connectionStatus = ConnectionStatus.disconnected;
+
+  Map<String, Color?> colorMap = {
+    "Red": Colors.red,
+    "Green": Colors.green,
+    "Blue": Colors.blue,
+    "Yellow": Colors.yellow,
+    "Orange": Colors.orange,
+    "Purple": Colors.purple,
+    "Pink": Colors.pink,
+    "Black": Colors.black
+  };
+  List<Color?> cardColors = List<Color?>.filled(16, null);
 
   String? mySocketId;
   List<String> clients = [];
   String selectedClient = "";
   int? selectedClientIndex;
   String messages = "";
+  String color = "";
+  String turn = "";
+  String wait = "";
 
   bool file_saving = false;
   bool file_loading = false;
@@ -62,6 +78,7 @@ class AppData with ChangeNotifier {
     _socketClient!.stream.listen(
       (message) {
         final data = jsonDecode(message);
+        print(data);
 
         if (connectionStatus != ConnectionStatus.connected) {
           connectionStatus = ConnectionStatus.connected;
@@ -90,9 +107,17 @@ class AppData with ChangeNotifier {
             clients.remove(data['id']);
             messages += "Disconnected client: ${data['id']}\n";
             break;
-          case 'private':
-            messages +=
-                "Private message from '${data['from']}': ${data['value']}\n";
+          case 'newTurn':
+            turn = data['plays'];
+            wait = data["waits"];
+            break;
+          case 'flip':
+            color = data['color'];
+            final row = data["row"];
+            final col = data["col"];
+            final index = row * 4 + col;
+            cardColors[index] = colorMap[color];
+            print(cardColors);
             break;
           default:
             messages += "Message from '${data['from']}': ${data['value']}\n";
@@ -152,7 +177,7 @@ class AppData with ChangeNotifier {
     if (selectedClientIndex == null) {
       broadcastMessage(msg);
     } else {
-      privateMessage(msg);
+      print("No client selected");
     }
   }
 
@@ -164,12 +189,26 @@ class AppData with ChangeNotifier {
     _socketClient!.sink.add(jsonEncode(message));
   }
 
-  privateMessage(String msg) {
-    if (selectedClient == "") return;
+  addPlayer(String user) {
     final message = {
-      'type': 'private',
-      'value': msg,
-      'destination': selectedClient,
+      'type': 'hello',
+      'name': user,
+    };
+    _socketClient!.sink.add(jsonEncode(message));
+  }
+
+  flipCard(int row, int col, String user) async {
+    final message = {'type': 'flip', 'row': row, 'col': col, 'name': user};
+    _socketClient!.sink.add(jsonEncode(message));
+    notifyListeners();
+  }
+
+  permFlip(int row, int col, String color) {
+    final message = {
+      'type': 'permShow',
+      'row': row,
+      'col': col,
+      'color': color,
     };
     _socketClient!.sink.add(jsonEncode(message));
   }

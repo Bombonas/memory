@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flip_card/flip_card.dart';
 import 'app_data.dart';
 import 'widget_selectable_list.dart';
 
@@ -14,22 +16,28 @@ class _LayoutConnectedState extends State<LayoutConnected> {
   final ScrollController _scrollController = ScrollController();
   final _messageController = TextEditingController();
   final FocusNode _messageFocusNode = FocusNode();
+  List<bool> _hovering = List<bool>.filled(16, false);
+  List<GlobalKey<FlipCardState>> cardKeys =
+      List.generate(16, (_) => GlobalKey<FlipCardState>());
+
+  int? firstClickedIndex;
+  Color? firstClickedColor;
+
+  @override
+  void initState() {
+    super.initState();
+    AppData appData = Provider.of<AppData>(context, listen: false);
+    appData.addPlayer(appData.userName);
+  }
 
   @override
   Widget build(BuildContext context) {
     AppData appData = Provider.of<AppData>(context);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    });
+    List<bool> clicked = List<bool>.filled(appData.cardColors.length, false);
 
     return CupertinoPageScaffold(
         navigationBar: const CupertinoNavigationBar(
-          middle: Text("WebSockets Client"),
+          middle: Text("Memory"),
         ),
         child: Column(
           children: [
@@ -39,25 +47,24 @@ class _LayoutConnectedState extends State<LayoutConnected> {
               children: [
                 const SizedBox(width: 8),
                 const Text(
-                  "Connected to ",
+                  "Torn de: ",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w200),
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  "ws://${appData.ip}:${appData.port}",
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w400),
-                ),
-                const Text(
-                  ", with ID: ",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w200),
-                ),
-                Text(
-                  "${appData.mySocketId}",
+                  appData.turn,
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.w400),
                 ),
                 Expanded(child: Container()),
+                const Text(
+                  "En espera: ",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w200),
+                ),
+                Text(
+                  appData.wait,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w200),
+                ),
                 SizedBox(
                   width: 140,
                   height: 32,
@@ -75,86 +82,76 @@ class _LayoutConnectedState extends State<LayoutConnected> {
                 const SizedBox(width: 8),
               ],
             ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(width: 8),
-                  Expanded(
-                      flex: 2,
-                      child: MediaQuery.removePadding(
-                          context: context,
-                          removeTop: true,
-                          child: ListView.builder(
-                              controller: _scrollController,
-                              primary: false,
-                              padding: EdgeInsets.only(
-                                  top: -MediaQuery.of(context).padding.top),
-                              itemCount: 1,
-                              itemBuilder: (BuildContext context, int index) {
-                                return Text(
-                                  appData.messages,
-                                  style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w200),
-                                );
-                              }))),
-                  const SizedBox(width: 8),
-                  Container(
-                      color: const Color.fromRGBO(240, 240, 240, 1),
-                      width: 142,
-                      child: MediaQuery.removePadding(
-                          context: context,
-                          removeTop: true,
-                          child: WidgetSelectableList())),
-                  const SizedBox(width: 8),
-                ],
+            const SizedBox(height: 24),
+            Center(
+              child: Column(
+                children: List.generate(
+                  4,
+                  (i) => Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(4, (j) {
+                      int index = i * 4 + j;
+                      return MouseRegion(
+                        onEnter: (_) {
+                          setState(() {
+                            _hovering[index] = true;
+                          });
+                        },
+                        onExit: (_) {
+                          setState(() {
+                            _hovering[index] = false;
+                          });
+                        },
+                        child: GestureDetector(
+                          onTap: () {
+                            print('Card $index tapped');
+                            setState(() {
+                              // When a card is clicked, update its clicked state
+                              appData.flipCard(i, j, appData.userName);
+                              if (firstClickedIndex == null) {
+                                // This is the first card clicked
+                                firstClickedIndex = index;
+                                firstClickedColor = appData.cardColors[index];
+                              } else {
+                                // This is the second card clicked
+                                if (appData.cardColors[index] !=
+                                    firstClickedColor) {
+                                  // If the second card's color is not the same as the first one, set their colors back to white after a delay
+                                  Future.delayed(Duration(seconds: 1), () {
+                                    setState(() {
+                                      appData.cardColors[firstClickedIndex!] =
+                                          Colors.white;
+                                      appData.cardColors[index] = Colors.white;
+                                    });
+                                  });
+                                }
+                                // Reset the first clicked card
+                                firstClickedIndex = null;
+                                firstClickedColor = null;
+                              }
+                            });
+                          },
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(color: Colors.black, width: 2),
+                            ),
+                            child: AnimatedContainer(
+                              duration: Duration(milliseconds: 200),
+                              color: _hovering[index]
+                                  ? Colors.grey
+                                  : appData.cardColors[index] ?? Colors.white,
+                              child: Padding(
+                                padding: EdgeInsets.all(64.0),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(width: 8),
-                const Text(
-                  "Message: ",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w200),
-                ),
-                Expanded(
-                  child: CupertinoTextField(
-                    controller: _messageController,
-                    focusNode: _messageFocusNode,
-                    onSubmitted: (value) {
-                      appData.send(_messageController.text);
-                      _messageController.text = "";
-                      FocusScope.of(context).requestFocus(_messageFocusNode);
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                SizedBox(
-                  width: 140,
-                  height: 32,
-                  child: CupertinoButton.filled(
-                    onPressed: () {
-                      appData.send(_messageController.text);
-                      _messageController.text = "";
-                      FocusScope.of(context).requestFocus(_messageFocusNode);
-                    },
-                    padding: EdgeInsets.zero,
-                    child: Text(
-                      appData.selectedClientIndex == null
-                          ? "Broadcast"
-                          : "Send",
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
-            ),
-            const SizedBox(height: 8),
+            )
           ],
         ));
   }
