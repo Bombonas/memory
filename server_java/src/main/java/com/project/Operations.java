@@ -19,6 +19,8 @@ public class Operations {
     int turn = 1;
     int turnFlips = 0; 
 
+    boolean endedGame = false;
+
     Operations(){
         ArrayList<String> colorPairs = new ArrayList<>();
         firstSelect.add(0);
@@ -40,7 +42,6 @@ public class Operations {
                 index++;
             }
         }
-        
     }
 
     public void printBoard() {

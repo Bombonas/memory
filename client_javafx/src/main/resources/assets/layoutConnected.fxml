@@ -48,5 +48,14 @@
             </GridPane>
          </children>
         </HBox>
+      <AnchorPane fx:id="anchorWinner" layoutY="200.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="200.0" prefWidth="800.0" visible="false">
+         <children>
+            <Label fx:id="winnerLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="318.0" layoutY="65.0" text="Label">
+               <font>
+                  <Font size="48.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
    </children>
 </AnchorPane>

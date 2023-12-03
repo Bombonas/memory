@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import com.project.AppSocketsClient.OnCloseObject;
 
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.util.Duration;
 
 import java.net.InetAddress;
@@ -122,10 +123,44 @@ public class AppData {
         String type = data.getString("type");
         switch (type) {
             case "flip":
-                if (connectionStatus == ConnectionStatus.CONNECTED) {
-                    CtrlLayoutConnected ctrlConnected = (CtrlLayoutConnected) UtilsViews.getController("Connected");
-                    ctrlConnected.setColorForAnchorPane(data.getInt("row"), data.getInt("col"), data.getString("color"));        
-                }
+                Platform.runLater(() -> {
+                    if (connectionStatus == ConnectionStatus.CONNECTED) {
+                        CtrlLayoutConnected ctrlConnected = (CtrlLayoutConnected) UtilsViews.getController("Connected");
+                        ctrlConnected.setColorForAnchorPane(data.getInt("row"), data.getInt("col"), data.getString("color"));        
+                    }
+                });
+                break;
+            case "newTurn":
+                Platform.runLater(() -> {
+                    if (connectionStatus == ConnectionStatus.CONNECTED) {
+                        CtrlLayoutConnected ctrlConnected = (CtrlLayoutConnected) UtilsViews.getController("Connected");
+                        ctrlConnected.updateTurn(data.getString("plays"), data.getString("waits"), data.getInt("prePoints"));        
+                    }
+                });
+                break;
+            case "permShow":
+                Platform.runLater(() -> {
+                    if (connectionStatus == ConnectionStatus.CONNECTED) {
+                        CtrlLayoutConnected ctrlConnected = (CtrlLayoutConnected) UtilsViews.getController("Connected");
+                        ctrlConnected.permShow(data.getInt("row"), data.getInt("col"), data.getString("color"));        
+                    }
+                });
+                break;
+            case "clear":
+                Platform.runLater(() -> {
+                    if (connectionStatus == ConnectionStatus.CONNECTED) {
+                        CtrlLayoutConnected ctrlConnected = (CtrlLayoutConnected) UtilsViews.getController("Connected");
+                        ctrlConnected.clearBoard();        
+                    }
+                });
+                break;
+            case "winner":
+                Platform.runLater(() -> {
+                    if (connectionStatus == ConnectionStatus.CONNECTED) {
+                        CtrlLayoutConnected ctrlConnected = (CtrlLayoutConnected) UtilsViews.getController("Connected");
+                        ctrlConnected.winnerMssg(data.getString("player"));        
+                    }
+                });
                 break;
         }
         if (connectionStatus == ConnectionStatus.CONNECTED) {
