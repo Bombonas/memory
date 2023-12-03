@@ -108,27 +108,9 @@ class _LayoutConnectedState extends State<LayoutConnected> {
                             setState(() {
                               // When a card is clicked, update its clicked state
                               appData.flipCard(i, j, appData.userName);
-                              if (firstClickedIndex == null) {
-                                // This is the first card clicked
-                                firstClickedIndex = index;
-                                firstClickedColor = appData.cardColors[index];
-                              } else {
-                                // This is the second card clicked
-                                if (appData.cardColors[index] !=
-                                    firstClickedColor) {
-                                  // If the second card's color is not the same as the first one, set their colors back to white after a delay
-                                  Future.delayed(Duration(seconds: 1), () {
-                                    setState(() {
-                                      appData.cardColors[firstClickedIndex!] =
-                                          Colors.white;
-                                      appData.cardColors[index] = Colors.white;
-                                    });
-                                  });
-                                }
-                                // Reset the first clicked card
-                                firstClickedIndex = null;
-                                firstClickedColor = null;
-                              }
+                              print(firstClickedIndex);
+                              print(firstClickedColor);
+                              print(appData.cardColors[index]);
                             });
                           },
                           child: Card(

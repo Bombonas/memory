@@ -44,6 +44,9 @@ class AppData with ChangeNotifier {
   String turn = "";
   String wait = "";
 
+  int? firstClickedIndex;
+  Color? firstClickedColor;
+
   bool file_saving = false;
   bool file_loading = false;
 
@@ -117,7 +120,9 @@ class AppData with ChangeNotifier {
             final col = data["col"];
             final index = row * 4 + col;
             cardColors[index] = colorMap[color];
-            print(cardColors);
+            print(cardColors[index]);
+            checkColors(index);
+
             break;
           default:
             messages += "Message from '${data['from']}': ${data['value']}\n";
@@ -201,6 +206,28 @@ class AppData with ChangeNotifier {
     final message = {'type': 'flip', 'row': row, 'col': col, 'name': user};
     _socketClient!.sink.add(jsonEncode(message));
     notifyListeners();
+  }
+
+  checkColors(int index) {
+    if (firstClickedIndex == null) {
+      // This is the first card clicked
+      firstClickedIndex = index;
+      firstClickedColor = cardColors[index];
+    } else {
+      // This is the second card clicked
+      if (cardColors[index] != firstClickedColor) {
+        // If the second card's color is not the same as the first one, set their colors back to white after a delay
+        Future.delayed(Duration(seconds: 1), () {
+          print("mis muertos");
+          print(firstClickedIndex);
+          if (firstClickedIndex != null) {
+            print("Hola");
+            cardColors[firstClickedIndex!] = Colors.white;
+            cardColors[index] = Colors.white;
+          }
+        });
+      }
+    }
   }
 
   permFlip(int row, int col, String color) {
